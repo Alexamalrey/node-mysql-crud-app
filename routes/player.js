@@ -13,7 +13,7 @@ module.exports = {
             return res.status(400).send("No files were uploaded.");
         }
         let message = '';
-        let firt_name = req.body.firt_name;
+        let first_name = req.body.first_name; // Error escribiendo en el valor req.body.first_name.
         let last_name = req.body.last_name;
         let position = req.body.position;
         let number = req.boynumber;
@@ -23,7 +23,17 @@ module.exports = {
         let fileExtension = uploadedFile.mimetype.split('/')[1]; //línea no incluida, error al usar fileExtension.
         image_name = username + '.' + fileExtension;
 
-        let usernameQuery = "SELESCT * FROM `players` WHERE user_name = '" + username + "'";
+        let usernameQuery = "SELECT * FROM `players` WHERE user_name = '" + username + "'"; // Error escribiendo el SELECT.
+        /**
+         * {
+         *        "code": "ER_PARSE_ERROR",
+         *        "errno": 1064,
+         *        "sqlMessage": "You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'SELESCT * FROM `players` WHERE user_name = 'Lada'' at line 1",
+         *        "sqlState": "42000",
+         *        "index": 0,
+         *        "sql": "SELESCT * FROM `players` WHERE user_name = 'Lada'"⚠️
+            }
+         */
         db.query(usernameQuery, (err, result) => {
             if (err) {
                 return res.status(500).send(err);
@@ -35,13 +45,12 @@ module.exports = {
                     title: "Welcome to soka | Add a new player"
                 });
             } else {
-                if (uploadedFile.mimetype === 'image/png' || uploadedFile.mimetype === 'image/gif') {
+                if (uploadedFile.mimetype === 'image/png' || uploadedFile.mimetype === 'image/jpeg' || uploadedFile.mimetype === 'image/gif') { //Error obviando el formato jpeg.
                     uploadedFile.mv(`public/assets/img/${image_name}`, (err) => {
                         if (err) {
                             return res.status(500).send(err);
                         }
-                        let query = "INSERT INTO `players` (first_name, last_name, position, number, image, use_name) Values ('" +
-                            firt_name + "', '" + last_name + "', '" + position + "', '" + number + "','" + image_name + "','" + username + "')";
+                        let query = "INSERT INTO `players` (first_name, last_name, position, number, image, user_name) Values ('" + first_name + "', '" + last_name + "', '" + position + "', '" + number + "','" + image_name + "','" + username + "')"; // Error escribiendo el campo "user_name" y el campo first_name de la variable en values.
                         db.query(query, (err, result) => {
                             if (err) {
                                 return res.status(500).send(err);
@@ -86,8 +95,8 @@ module.exports = {
         let position = req.body.position;
         let number = req.body.number;
 
-        let query = "UPDATE `players` SET `firt_name` = '" + first_name + "', `last_name` = '" + last_name + "', `position` = '" + position + "', `number` = '" + number + "' WHERE `players`.`id` = '" + playerId + "'";
-        db.query(query, (result) => {
+        let query = "UPDATE `players` SET `first_name` = '" + first_name + "', `last_name` = '" + last_name + "', `position` = '" + position + "', `number` = '" + number + "' WHERE `players`.`id` = '" + playerId + "'";
+        db.query(query, (err, result) => { //Olvidado la variable err y parte del código.
             if (err) {
                 return res.status(500).send(err);
             }
@@ -96,7 +105,7 @@ module.exports = {
     },
     deletePlayer: (req, res) => {
         let playerId = req.params.id;
-        let getImageQuery = 'SELECT image from ´players´ WHERE id = "' + playerId + '"';
+        let getImageQuery = 'SELECT image from `players` WHERE id = "' + playerId + '"'; //Comillas de players erroneas ´´.
         let deleteUserQuery = 'DELETE FROM players WHERE id = "' + playerId + '"';
 
         db.query(getImageQuery, (err, result) => {
