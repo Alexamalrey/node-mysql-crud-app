@@ -19,7 +19,8 @@ module.exports = {
         let number = req.boynumber;
         let username = req.body.username;
         let uploadedFile = req.files.image;
-        let image_name = uploadedFile.mimetype.split('/')[1];
+        let image_name = uploadedFile.name; // Linea mal escrita, cruzada con la de abajo
+        let fileExtension = uploadedFile.mimetype.split('/')[1]; //línea no incluida, error al usar fileExtension.
         image_name = username + '.' + fileExtension;
 
         let usernameQuery = "SELESCT * FROM `players` WHERE user_name = '" + username + "'";
